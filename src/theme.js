@@ -17,6 +17,8 @@ const DARK = {
   rec:   "#22c55e",
   desp:  "#ef4444",
   orc:   "#3a3a3a",
+  line:  "#1a1a1a",                 // divisor suave (hairline) em tabelas
+  hover: "rgba(255,255,255,0.045)", // hover de linha
 };
 
 const LIGHT = {
@@ -38,6 +40,8 @@ const LIGHT = {
   rec:   "#16803c",
   desp:  "#dc2626",
   orc:   "#8d8379",
+  line:  "#efede8",                 // divisor suave (hairline) em tabelas
+  hover: "rgba(10,10,10,0.028)",    // hover de linha
 };
 
 const CHARTS = {
@@ -95,3 +99,26 @@ export function getInitialThemeMode() {
 
 // Shared font — DM Mono for data labels and numeric values
 export const MONO = "'DM Mono', monospace";
+
+// ─── Escala tipográfica ──────────────────────────────────────────────────────
+// Papéis semânticos por tipo de dado. Texto herda a fonte do painel; papéis
+// numéricos fixam MONO. Aplicar via spread: style={{ ...TYPE.kpiValue }}.
+// Para recharts (SVG), usar só fontSize/fontWeight/fontFamily (sem textTransform).
+export const TYPE = {
+  display:      { fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.15 },
+  sectionTitle: { fontSize: 13, fontWeight: 700, letterSpacing: "-0.01em", lineHeight: 1.3 },
+  sectionLabel: { fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", lineHeight: 1.4 },
+  kpiValue:     { fontSize: 19, fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.1, fontFamily: MONO },
+  kpiLabel:     { fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", lineHeight: 1.35 },
+  tableHeader:  { fontSize: 10, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", lineHeight: 1.3 },
+  tableCell:    { fontSize: 12, fontWeight: 400, lineHeight: 1.45 },
+  tableMono:    { fontSize: 12, fontWeight: 500, lineHeight: 1.45, fontFamily: MONO },
+  axisTick:     { fontSize: 11, fontWeight: 500, fontFamily: MONO },
+  dataLabel:    { fontSize: 11, fontWeight: 600, fontFamily: MONO },
+  badge:        { fontSize: 9,  fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", lineHeight: 1.3 },
+  body:         { fontSize: 13, fontWeight: 400, lineHeight: 1.55 },
+  caption:      { fontSize: 10, fontWeight: 400, letterSpacing: "0.02em", lineHeight: 1.4 },
+};
+
+// Raios padronizados
+export const RADII = { sm: 6, md: 10, lg: 14, pill: 999 };

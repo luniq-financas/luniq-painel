@@ -54,7 +54,7 @@ const pct  = (real, orc) => orc > 0 ? (real / orc) * 100 : 0;
 const money = fmt.brl0;
 
 // - Shared chart props ---------------------------------------------------------
-const AX  = { fill:CA.tick, fontSize:9, fontFamily:MONO };
+const AX  = { fill:CA.tick, fontSize:11, fontFamily:MONO };
 const GRD = <CartesianGrid strokeDasharray="2 4" stroke={CA.grid} vertical={false} />;
 
 // - Progress bar row -----------------------------------------------------------
@@ -308,7 +308,7 @@ function ViewArea({ rows, onDrill }) {
               formatter={v => <span style={{ color:T.sub }}>{v}</span>} />
             <Bar dataKey="orc"  name="Orçado"    fill={T.orc} radius={[0,3,3,0]} maxBarSize={10} />
             <Bar dataKey="real" name="Realizado" fill={T.red} radius={[0,3,3,0]} maxBarSize={10}>
-              <LabelList dataKey="realPct" position="right" fill={T.sub} fontSize={9} fontFamily={MONO} formatter={v => `${v.toFixed(0)}%`} />
+              <LabelList dataKey="realPct" position="right" fill={T.sub} fontSize={11} fontFamily={MONO} formatter={v => `${v.toFixed(0)}%`} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -353,7 +353,7 @@ function ViewLinha({ rows, areaFiltro, setAreaFiltro }) {
             <Tooltip content={<TipBRL formatter={money} />} />
             <Bar dataKey="orc"  name="Orçado"    fill={T.orc} radius={[0,3,3,0]} maxBarSize={8} />
             <Bar dataKey="real" name="Realizado" fill={T.red} radius={[0,3,3,0]} maxBarSize={8}>
-              <LabelList dataKey="realPct" position="right" fill={T.sub} fontSize={9} fontFamily={MONO} formatter={v => `${v.toFixed(0)}%`} />
+              <LabelList dataKey="realPct" position="right" fill={T.sub} fontSize={11} fontFamily={MONO} formatter={v => `${v.toFixed(0)}%`} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

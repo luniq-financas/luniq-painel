@@ -489,7 +489,7 @@ export default function DRE() {
     };
   }, [dreVivo, tabelaBase, tf, ultimoMes, mesAnterior, rb, eb]);
 
-  const AX = { fill:CA.tick, fontSize:9, fontFamily:MONO };
+  const AX = { fill:CA.tick, fontSize:11, fontFamily:MONO };
 
   // ── Comparativo anual: anos históricos + 2026 YTD ──────────────────────────
   const anosHist    = useMemo(() => Object.keys(dreHist).sort(), [dreHist]);
@@ -606,7 +606,7 @@ export default function DRE() {
                 <Tooltip content={<TipPct />} />
                 <Line type="monotone" dataKey={label} stroke={cor} strokeWidth={2}
                   dot={{ r:3, fill:cor, strokeWidth:0 }}
-                  label={{ position:"top", fontSize:8, fill:cor, formatter:v=>v.toFixed(1)+"%" }} />
+                  label={{ position:"top", fontSize:11, fontWeight:600, fill:cor, formatter:v=>v.toFixed(1)+"%" }} />
               </LineChart>
             </ResponsiveContainer>
           </Card>

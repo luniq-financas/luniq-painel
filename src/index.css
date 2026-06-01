@@ -16,6 +16,8 @@
   --red:   #dc2626;
   --amb:   #f59e0b;
   --purp:  #087f8f;
+  --line:  #efede8;
+  --hover: rgba(10,10,10,0.028);
   --chart-grid: #e4e4e0;
   --chart-tick: #666666;
   --chart-zero: #999999;
@@ -33,8 +35,8 @@ body {
 
 button { font-family: inherit; cursor: pointer; }
 
-.ui-table-row { transition: background-color .1s ease; }
-.ui-table-row:hover { background: rgba(255,255,255,0.025); }
+.ui-table-row { transition: background-color .12s ease; }
+.ui-table-row:hover { background: var(--hover); }
 
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 

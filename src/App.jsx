@@ -4,10 +4,25 @@ import { initSessionFromUrl, clearAuth, onAuthChange } from "./auth";
 import { DEFAULT_EMPRESA_ID, EMPRESAS, GRUPO_PRINCIPAL, getEmpresaById } from "./empresas/2AS-inteligencia-financeira/empresas";
 import { getActiveEmpresaId, hasSelectedEmpresa, onActiveEmpresaChange, setActiveEmpresaId } from "./empresas/2AS-inteligencia-financeira/empresaAtiva";
 import { prefetchSheets } from "./hooks/useSheets";
-import { applyThemeMode, getInitialThemeMode, T } from "./theme";
+import { applyThemeMode, getInitialThemeMode, T, TYPE } from "./theme";
 import SidebarRouteItem from "./components/SidebarRouteItem.jsx";
 
 const SIDEBAR_W = 246;
+const MOBILE_BP = 860;
+
+// Detecta telas pequenas (celular/tablet em retrato) para alternar a navegação em drawer.
+function useIsMobile(maxWidth = MOBILE_BP) {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(`(max-width:${maxWidth}px)`).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width:${maxWidth}px)`);
+    const onChange = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [maxWidth]);
+  return isMobile;
+}
 
 function Logo2AS({ size = 40, minimal = false, onlyL = false }) {
   const light = T.mode === "light";
@@ -343,6 +358,10 @@ export default function App() {
   const [menuBusca,     setMenuBusca]     = useState("");
   const [favoritos,     setFavoritos]     = useState(() => readStoredList("painel-menu-favorites", DEFAULT_FAVORITES));
   const [secoesAbertas, setSecoesAbertas] = useState(() => readStoredObject("painel-menu-sections", {}));
+  const isMobile = useIsMobile();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  // No mobile a lateral vira drawer e sempre exibe o menu completo (não o trilho de 48px).
+  const expanded = isMobile ? true : sidebar;
 
   const rotaAtiva = ROTAS.find(r => r.id === rota) || ROTAS[0];
   const secaoAtiva = SECOES.find(s => s.rotas.some(r => r.id === rota)) || SECOES[0];
@@ -357,6 +376,7 @@ export default function App() {
   const navigate = useCallback((id) => {
     if (!ROTAS.some(r => r.id === id)) return;
     setRota(id);
+    setMobileNavOpen(false); // fecha o drawer ao navegar (mobile)
   }, []);
 
   const preloadRoute = useCallback((r) => {
@@ -386,6 +406,14 @@ export default function App() {
   useEffect(() => {
     syncRouteInUrl(rota);
   }, [rota]);
+
+  // Trava o scroll do body enquanto o drawer está aberto no mobile.
+  useEffect(() => {
+    if (!isMobile || !mobileNavOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [isMobile, mobileNavOpen]);
 
   const alternarTema = () => {
     const next = applyThemeMode(tema === "dark" ? "light" : "dark");
@@ -429,7 +457,7 @@ export default function App() {
       key={r.id}
       r={r}
       ativo={rota === r.id}
-      sidebar={sidebar}
+      sidebar={expanded}
       tema={tema}
       compact={compact}
       isFavorite={favoritos.includes(r.id)}
@@ -447,76 +475,97 @@ export default function App() {
     <div style={{ minHeight:"100vh", background:T.bg, color:T.txt, fontFamily:"'Plus Jakarta Sans', system-ui, sans-serif", display:"flex", flexDirection:"column" }}>
 
       {/* ── Topbar ── */}
-      <div style={{ height:56, background:T.surf, borderBottom:`1px solid ${T.brd}`, display:"flex", alignItems:"center", padding:"0 20px", gap:16, position:"sticky", top:0, zIndex:200, flexShrink:0 }}>
-        <div style={{ display:"flex", alignItems:"center", minWidth: sidebar ? SIDEBAR_W : 48, overflow:"hidden", transition:"min-width 0.2s ease", flexShrink:0 }}>
-          {sidebar
-            ? <Logo2AS size={22} minimal />
-            : <Logo2AS size={20} onlyL />
+      <div style={{ height:56, background:T.surf, borderBottom:`1px solid ${T.brd}`, display:"flex", alignItems:"center", padding: isMobile ? "0 10px" : "0 20px", gap: isMobile ? 8 : 16, position:"sticky", top:0, zIndex:200, flexShrink:0 }}>
+        {isMobile && (
+          <button onClick={() => setMobileNavOpen(o => !o)}
+            aria-label={mobileNavOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={mobileNavOpen}
+            style={{ display:"flex", alignItems:"center", justifyContent:"center", width:40, height:40, flexShrink:0, border:`1px solid ${T.brd}`, borderRadius:6, background:T.card, color:T.sub, cursor:"pointer" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+        )}
+        <div style={{ display:"flex", alignItems:"center", minWidth: isMobile ? "auto" : (sidebar ? SIDEBAR_W : 48), overflow:"hidden", transition:"min-width 0.2s ease", flexShrink:0 }}>
+          {(isMobile || !sidebar)
+            ? <Logo2AS size={20} onlyL />
+            : <Logo2AS size={22} minimal />
           }
         </div>
 
         <div style={{ flex:1, minWidth:0, display:"flex", alignItems:"center", gap:8, overflow:"hidden" }}>
-          <span style={{ fontSize:9, color:T.blue2, textTransform:"uppercase", fontWeight:700, flexShrink:0, letterSpacing:".18em", fontFamily:"'DM Mono',monospace" }}>
-            {secaoAtiva.label}
-          </span>
-          <span style={{ color:T.brd2, flexShrink:0 }}>·</span>
-          <span style={{ fontSize:12, fontWeight:600, color:T.sub, overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis" }}>
-            {rotaAtiva.label}
-          </span>
+          {!isMobile && <>
+            <span style={{ fontSize:9, color:T.blue2, textTransform:"uppercase", fontWeight:700, flexShrink:0, letterSpacing:".18em", fontFamily:"'DM Mono',monospace" }}>
+              {secaoAtiva.label}
+            </span>
+            <span style={{ color:T.brd2, flexShrink:0 }}>·</span>
+            <span style={{ fontSize:12, fontWeight:600, color:T.sub, overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis" }}>
+              {rotaAtiva.label}
+            </span>
+          </>}
         </div>
 
-        <button onClick={alternarTema}
-          style={{ display:"flex", alignItems:"center", gap:7, padding:"6px 10px", borderRadius:4, border:`1px solid ${T.brd}`, background: tema === "light" ? "rgba(217,119,6,0.08)" : "rgba(245,158,11,0.10)", color:T.blue2, fontSize:11, fontWeight:700, letterSpacing:".04em", fontFamily:"inherit", whiteSpace:"nowrap", cursor:"pointer" }}>
-          {tema === "dark" ? "☀ Claro" : "◑ Escuro"}
+        <button onClick={alternarTema} aria-label={tema === "dark" ? "Tema claro" : "Tema escuro"}
+          style={{ display:"flex", alignItems:"center", gap:7, padding: isMobile ? "0" : "6px 10px", width: isMobile ? 40 : "auto", height: isMobile ? 40 : "auto", justifyContent:"center", borderRadius: isMobile ? 6 : 4, border:`1px solid ${T.brd}`, background: tema === "light" ? "rgba(217,119,6,0.08)" : "rgba(245,158,11,0.10)", color:T.blue2, fontSize:11, fontWeight:700, letterSpacing:".04em", fontFamily:"inherit", whiteSpace:"nowrap", cursor:"pointer", flexShrink:0 }}>
+          {isMobile ? (tema === "dark" ? "☀" : "◑") : (tema === "dark" ? "☀ Claro" : "◑ Escuro")}
         </button>
 
         <select
           value={empresaAtiva.id}
           onChange={event => setEmpresaId(setActiveEmpresaId(event.target.value))}
           aria-label="Selecionar empresa"
-          style={{ height:32, borderRadius:4, border:`1px solid ${T.brd}`, background:T.card, color:T.sub, padding:"0 8px", fontFamily:"inherit", fontSize:11, fontWeight:600, maxWidth:190 }}
+          style={{ height: isMobile ? 40 : 32, borderRadius:4, border:`1px solid ${T.brd}`, background:T.card, color:T.sub, padding:"0 8px", fontFamily:"inherit", fontSize:11, fontWeight:600, maxWidth: isMobile ? 110 : 190, minWidth:0, flexShrink:1 }}
         >
           {EMPRESAS.map(empresa => <option key={empresa.id} value={empresa.id}>{empresa.nome}</option>)}
         </select>
 
-        <div style={{ fontSize:10, color:"#555", fontFamily:"'DM Mono', monospace", letterSpacing:".08em", whiteSpace:"nowrap" }}>
-          {new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"short", year:"numeric" })}
-        </div>
+        {!isMobile && (
+          <div style={{ fontSize:10, color:"#555", fontFamily:"'DM Mono', monospace", letterSpacing:".08em", whiteSpace:"nowrap" }}>
+            {new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"short", year:"numeric" })}
+          </div>
+        )}
 
-        <button onClick={clearAuth}
-          style={{ border:`1px solid ${T.brd}`, background:"transparent", color:T.muted, borderRadius:4, padding:"6px 10px", fontFamily:"inherit", fontSize:11, letterSpacing:".04em", cursor:"pointer" }}>
+        <button onClick={clearAuth} aria-label="Sair"
+          style={{ border:`1px solid ${T.brd}`, background:"transparent", color:T.muted, borderRadius: isMobile ? 6 : 4, padding: isMobile ? "0 12px" : "6px 10px", height: isMobile ? 40 : "auto", fontFamily:"inherit", fontSize:11, letterSpacing:".04em", cursor:"pointer", flexShrink:0, whiteSpace:"nowrap" }}>
           Sair
         </button>
       </div>
 
       <div style={{ display:"flex", flex:1, overflow:"hidden" }}>
 
-        {/* ── Sidebar com seções F1 ── */}
-        <div style={{ width: sidebar ? SIDEBAR_W : 48, background:T.surf, borderRight:`1px solid ${T.brd}`, display:"flex", flexDirection:"column", flexShrink:0, transition:"width 0.18s ease", overflow:"hidden" }}>
+        {/* Backdrop do drawer (mobile) */}
+        {isMobile && mobileNavOpen && (
+          <div onClick={() => setMobileNavOpen(false)} aria-hidden
+            style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:290 }} />
+        )}
+
+        {/* ── Sidebar com seções F1 (drawer no mobile) ── */}
+        <div style={ isMobile
+          ? { position:"fixed", top:0, left:0, height:"100dvh", width:"min(284px,84vw)", background:T.surf, borderRight:`1px solid ${T.brd}`, display:"flex", flexDirection:"column", zIndex:300, overflow:"hidden", transform: mobileNavOpen ? "translateX(0)" : "translateX(-100%)", transition:"transform 0.24s ease", boxShadow: mobileNavOpen ? "0 12px 40px rgba(0,0,0,0.45)" : "none" }
+          : { width: sidebar ? SIDEBAR_W : 48, background:T.surf, borderRight:`1px solid ${T.brd}`, display:"flex", flexDirection:"column", flexShrink:0, transition:"width 0.18s ease", overflow:"hidden" } }>
           {/* Toggle collapse */}
-          <button type="button" onClick={alternarSidebar}
-            title={sidebar ? "Recolher painel lateral" : "Expandir painel lateral"}
-            aria-label={sidebar ? "Recolher painel lateral" : "Expandir painel lateral"}
+          <button type="button" onClick={isMobile ? () => setMobileNavOpen(false) : alternarSidebar}
+            title={isMobile ? "Fechar menu" : (sidebar ? "Recolher painel lateral" : "Expandir painel lateral")}
+            aria-label={isMobile ? "Fechar menu" : (sidebar ? "Recolher painel lateral" : "Expandir painel lateral")}
             style={{
-              background: sidebar ? T.card : "transparent",
+              background: expanded ? T.card : "transparent",
               border:"none",
               borderBottom:`1px solid ${T.brd}`,
               color:T.dim,
-              padding: sidebar ? "10px 12px" : "11px 0",
-              textAlign: sidebar ? "left" : "center",
+              padding: expanded ? "10px 12px" : "11px 0",
+              textAlign: expanded ? "left" : "center",
               fontSize:11,
               fontWeight:600,
               flexShrink:0,
               cursor:"pointer",
               display:"flex",
               alignItems:"center",
-              justifyContent: sidebar ? "space-between" : "center",
+              justifyContent: expanded ? "space-between" : "center",
               gap:10,
               fontFamily:"inherit",
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = T.sub; e.currentTarget.style.background = sidebar ? (tema === "light" ? "rgba(217,119,6,0.07)" : "rgba(255,255,255,0.04)") : "rgba(255,255,255,0.04)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = T.dim; e.currentTarget.style.background = sidebar ? T.card : "transparent"; }}>
-            {sidebar ? (
+            onMouseEnter={e => { e.currentTarget.style.color = T.sub; e.currentTarget.style.background = expanded ? (tema === "light" ? "rgba(217,119,6,0.07)" : "rgba(255,255,255,0.04)") : "rgba(255,255,255,0.04)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = T.dim; e.currentTarget.style.background = expanded ? T.card : "transparent"; }}>
+            {expanded ? (
               <>
                 <span style={{ display:"flex", alignItems:"center", gap:8 }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden>
@@ -525,7 +574,7 @@ export default function App() {
                   </svg>
                   <span>Menu</span>
                 </span>
-                <span style={{ fontSize:10, fontWeight:700, color:T.dim, letterSpacing:"0.06em" }}>RECOLHER</span>
+                <span style={{ fontSize:10, fontWeight:700, color:T.dim, letterSpacing:"0.06em" }}>{isMobile ? "FECHAR" : "RECOLHER"}</span>
               </>
             ) : (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden>
@@ -536,7 +585,7 @@ export default function App() {
           </button>
 
           <div style={{ flex:1, overflowY:"auto", overflowX:"hidden" }}>
-            {sidebar && (
+            {expanded && (
               <div style={{ padding:"8px 10px 6px" }}>
                 <input
                   type="search"
@@ -559,7 +608,7 @@ export default function App() {
               </div>
             )}
 
-            {sidebar && menuBuscaNorm && (
+            {expanded && menuBuscaNorm && (
               <div>
                 <div style={{ padding:"6px 12px 4px", fontSize:8, fontWeight:700, color:T.dim, textTransform:"uppercase", letterSpacing:"0.08em" }}>
                   Resultados
@@ -570,7 +619,7 @@ export default function App() {
               </div>
             )}
 
-            {sidebar && !menuBuscaNorm && rotasFavoritas.length > 0 && (
+            {expanded && !menuBuscaNorm && rotasFavoritas.length > 0 && (
               <div>
                 <div style={{ padding:"6px 12px 4px", display:"flex", alignItems:"center", gap:6 }}>
                   <span style={{ fontSize:8, fontWeight:700, color:T.dim, textTransform:"uppercase", letterSpacing:"0.08em" }}>Favoritos</span>
@@ -584,7 +633,7 @@ export default function App() {
               const aberta = isSecaoAberta(secao);
               return (
               <div key={secao.id}>
-                {sidebar && (
+                {expanded && (
                   <button
                     type="button"
                     onClick={() => toggleSecao(secao.id)}
@@ -625,18 +674,18 @@ export default function App() {
                     </span>
                   </button>
                 )}
-                {!sidebar && secao !== SECOES[0] && (
+                {!expanded && secao !== SECOES[0] && (
                   <div style={{ height:1, background:T.brd, margin:"6px 10px" }} />
                 )}
 
-                {(!sidebar || aberta) && secao.rotas.map(r => renderRouteItem(r))}
+                {(!expanded || aberta) && secao.rotas.map(r => renderRouteItem(r))}
               </div>
               );
             })}
           </div>
 
           {/* Rodapé da sidebar */}
-          {sidebar && (
+          {expanded && (
             <div style={{ padding:"8px 12px", borderTop:`1px solid ${T.brd}`, flexShrink:0 }}>
               <div style={{ fontSize:8, color:"#555", textTransform:"uppercase", letterSpacing:"0.12em", fontFamily:"'DM Mono',monospace" }}>
                 {GRUPO_PRINCIPAL.nome} · {empresaAtiva.anoBase}
@@ -654,7 +703,7 @@ export default function App() {
             }}>
             {/* Cabeçalho da página */}
             <div style={{ marginBottom:22, paddingBottom:18, borderBottom:`1px solid ${T.brd}` }}>
-              <h1 style={{ fontSize:20, fontWeight:800, margin:0, color:T.txt, letterSpacing:"-.025em", lineHeight:1.15 }}>{rotaAtiva.label}</h1>
+              <h1 style={{ ...TYPE.display, margin:0, color:T.txt }}>{rotaAtiva.label}</h1>
               <p style={{ fontSize:10, color:"#555", marginTop:5, fontFamily:"'DM Mono',monospace", letterSpacing:".1em", textTransform:"uppercase" }}>
                 {secaoAtiva.label} · {empresaAtiva.nome} · {empresaAtiva.anoBase}
               </p>
