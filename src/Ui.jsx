@@ -4,15 +4,15 @@ import { Tooltip } from "recharts";
 
 // - Card ----------------------------------------------------------------------
 export const Card = ({ children, style={} }) => (
-  <div style={{ background:T.card, border:`1px solid ${T.brd}`, borderRadius:RADII.md, overflow:"hidden", ...style }}>
+  <div style={{ background:T.card, border:`1px solid ${T.brd}`, borderRadius:RADII.md, boxShadow:T.shadow, overflow:"hidden", ...style }}>
     {children}
   </div>
 );
 
 // - KPI card ------------------------------------------------------------------
 export const Kpi = ({ label, value, sub, cor, accent, urgent, delta, deltaGood = "up", deltaFormatter = fmt.brlk }) => (
-  <div style={{ background: urgent ? "rgba(239,68,68,0.07)" : T.card, border:`1px solid ${urgent ? "rgba(239,68,68,0.35)" : T.brd}`, borderRadius:RADII.md, padding:"14px 16px", position:"relative", overflow:"hidden" }}>
-    <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background: accent || cor || T.blue }} />
+  <div style={{ background: urgent ? "rgba(239,68,68,0.07)" : T.card, border:`1px solid ${urgent ? "rgba(239,68,68,0.35)" : T.brd}`, borderRadius:RADII.md, boxShadow:T.shadow, padding:"16px 18px", position:"relative", overflow:"hidden" }}>
+    <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background: accent || cor || T.blue }} />
     <div style={{ ...TYPE.kpiLabel, color:T.muted, marginBottom:6 }}>{label}</div>
     <div style={{ ...TYPE.kpiValue, color: cor || T.txt }}>{value}</div>
     {typeof delta === "number" && (

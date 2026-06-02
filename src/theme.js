@@ -19,6 +19,7 @@ const DARK = {
   orc:   "#3a3a3a",
   line:  "#1a1a1a",                 // divisor suave (hairline) em tabelas
   hover: "rgba(255,255,255,0.045)", // hover de linha
+  shadow: "0 1px 2px rgba(0,0,0,0.35), 0 10px 30px rgba(0,0,0,0.42)", // elevação de card
 };
 
 const LIGHT = {
@@ -42,6 +43,7 @@ const LIGHT = {
   orc:   "#8d8379",
   line:  "#efede8",                 // divisor suave (hairline) em tabelas
   hover: "rgba(10,10,10,0.028)",    // hover de linha
+  shadow: "0 1px 2px rgba(16,15,12,0.05), 0 6px 22px rgba(16,15,12,0.08)", // elevação de card
 };
 
 const CHARTS = {
@@ -108,7 +110,7 @@ export const TYPE = {
   display:      { fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.15 },
   sectionTitle: { fontSize: 13, fontWeight: 700, letterSpacing: "-0.01em", lineHeight: 1.3 },
   sectionLabel: { fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", lineHeight: 1.4 },
-  kpiValue:     { fontSize: 19, fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.1, fontFamily: MONO },
+  kpiValue:     { fontSize: 23, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.08, fontFamily: MONO },
   kpiLabel:     { fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", lineHeight: 1.35 },
   tableHeader:  { fontSize: 10, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", lineHeight: 1.3 },
   tableCell:    { fontSize: 12, fontWeight: 400, lineHeight: 1.45 },
