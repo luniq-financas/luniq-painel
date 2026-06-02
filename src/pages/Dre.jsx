@@ -4,6 +4,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Responsive
 import { useSheets, toNum, fmt } from "../hooks/useSheets";
 import { T, CA, MONO } from "../theme";
 import { Card, Kpi, PeriodSelector, TabBar, TipBRL, TipPct } from "../Ui";
+import { fmtAxis } from "../chartTheme";
 import ViewModeToggle from "../components/ViewModeToggle";
 import ExecutiveAlerts from "../components/ExecutiveAlerts";
 
@@ -550,10 +551,10 @@ export default function DRE() {
 
       {/* KPIs */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(148px,1fr))", gap:10 }}>
-        <Kpi label="Receita Bruta"     value={money(rb)}      cor={T.grn}       accent={T.grn} />
-        <Kpi label="Lucro Bruto"       value={money(lb)}      cor={T.grn}       accent={T.grn} sub={rb>0 ? "Margem: "+((lb/rb)*100).toFixed(1)+"%" : undefined} />
-        <Kpi label="EBITDA"            value={money(eb)}      cor={T.corV(eb)}  accent={T.corV(eb)} sub={rb>0 ? "Margem: "+((eb/rb)*100).toFixed(1)+"%" : undefined} />
-        <Kpi label="Resultado Líquido" value={money(rs)}      cor={T.corV(rs)}  accent={T.corV(rs)} sub={rb>0 ? "Margem: "+((rs/rb)*100).toFixed(1)+"%" : undefined} />
+        <Kpi label="Receita Bruta"     value={money(rb)}      cor={T.grn}       accent={T.grn}      spark={dadosBarras.map(d=>d.Receita)} />
+        <Kpi label="Lucro Bruto"       value={money(lb)}      cor={T.grn}       accent={T.grn}      sub={rb>0 ? "Margem: "+((lb/rb)*100).toFixed(1)+"%" : undefined} spark={dadosBarras.map(d=>d["Lucro Bruto"])} />
+        <Kpi label="EBITDA"            value={money(eb)}      cor={T.corV(eb)}  accent={T.corV(eb)} sub={rb>0 ? "Margem: "+((eb/rb)*100).toFixed(1)+"%" : undefined} spark={mesesRealizados.map(m=>tabelaBase["(=) EBITDA"]?.[m]||0)} />
+        <Kpi label="Resultado Líquido" value={money(rs)}      cor={T.corV(rs)}  accent={T.corV(rs)} sub={rb>0 ? "Margem: "+((rs/rb)*100).toFixed(1)+"%" : undefined} spark={dadosBarras.map(d=>d.Resultado)} />
       </div>
 
       {modo === "Executivo" && <ExecutiveAlerts items={alertasExecutivos} />}
@@ -620,7 +621,7 @@ export default function DRE() {
           <BarChart data={dadosBarras} barGap={3} margin={{top:4,right:4,bottom:0,left:0}}>
             <CartesianGrid strokeDasharray="2 4" stroke={CA.grid} vertical={false} />
             <XAxis dataKey="mes" tick={AX} axisLine={false} tickLine={false} />
-            <YAxis tickFormatter={money} tick={AX} axisLine={false} tickLine={false} width={74} />
+            <YAxis tickFormatter={fmtAxis} tick={AX} axisLine={false} tickLine={false} width={58} />
             <Tooltip content={<TipBRL formatter={money} />} />
             <ReferenceLine y={0} stroke={T.dim} strokeWidth={1} />
             <Bar dataKey="Receita"      fill={T.grn}  radius={[3,3,0,0]} maxBarSize={28} opacity={0.9} />

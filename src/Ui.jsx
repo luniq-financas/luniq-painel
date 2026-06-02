@@ -1,6 +1,7 @@
+import { useId } from "react";
 import { T, CA, MONO, TYPE, RADII } from "./theme";
 import { fmt } from "./hooks/useSheets";
-import { Tooltip } from "recharts";
+import { Tooltip, AreaChart, Area, ResponsiveContainer } from "recharts";
 
 // - Card ----------------------------------------------------------------------
 export const Card = ({ children, style={} }) => (
@@ -10,19 +11,44 @@ export const Card = ({ children, style={} }) => (
 );
 
 // - KPI card ------------------------------------------------------------------
-export const Kpi = ({ label, value, sub, cor, accent, urgent, delta, deltaGood = "up", deltaFormatter = fmt.brlk }) => (
-  <div style={{ background: urgent ? "rgba(239,68,68,0.07)" : T.card, border:`1px solid ${urgent ? "rgba(239,68,68,0.35)" : T.brd}`, borderRadius:RADII.md, boxShadow:T.shadow, padding:"16px 18px", position:"relative", overflow:"hidden" }}>
-    <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background: accent || cor || T.blue }} />
-    <div style={{ ...TYPE.kpiLabel, color:T.muted, marginBottom:6 }}>{label}</div>
-    <div style={{ ...TYPE.kpiValue, color: cor || T.txt }}>{value}</div>
-    {typeof delta === "number" && (
-      <div style={{ ...TYPE.caption, color:(deltaGood === "down" ? delta <= 0 : delta >= 0) ? T.grn : T.red, marginTop:5, fontFamily:MONO, fontWeight:600 }}>
-        {delta >= 0 ? "+" : ""}{deltaFormatter(delta)}
-      </div>
-    )}
-    {sub && <div style={{ ...TYPE.caption, color:T.muted, marginTop:4 }}>{sub}</div>}
-  </div>
-);
+export const Kpi = ({ label, value, sub, cor, accent, urgent, delta, deltaGood = "up", deltaFormatter = fmt.brlk, deltaLabel, spark }) => {
+  const gid = useId().replace(/:/g, "");
+  const sc = cor || accent || T.blue;
+  const hasSpark = Array.isArray(spark) && spark.length > 1;
+  return (
+    <div style={{ background: urgent ? "rgba(239,68,68,0.07)" : T.card, border:`1px solid ${urgent ? "rgba(239,68,68,0.35)" : T.brd}`, borderRadius:RADII.md, boxShadow:T.shadow, padding:"16px 18px", position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background: accent || cor || T.blue }} />
+      <div style={{ ...TYPE.kpiLabel, color:T.muted, marginBottom:6 }}>{label}</div>
+      <div style={{ ...TYPE.kpiValue, color: cor || T.txt }}>{value}</div>
+      {(typeof delta === "number" || deltaLabel) && (
+        <div style={{ ...TYPE.caption, marginTop:5, display:"flex", alignItems:"baseline", gap:6, flexWrap:"wrap" }}>
+          {typeof delta === "number" && (
+            <span style={{ color:(deltaGood === "down" ? delta <= 0 : delta >= 0) ? T.grn : T.red, fontFamily:MONO, fontWeight:600 }}>
+              {delta >= 0 ? "▲ " : "▼ "}{deltaFormatter(Math.abs(delta))}
+            </span>
+          )}
+          {deltaLabel && <span style={{ color:T.dim }}>{deltaLabel}</span>}
+        </div>
+      )}
+      {sub && <div style={{ ...TYPE.caption, color:T.muted, marginTop:4 }}>{sub}</div>}
+      {hasSpark && (
+        <div style={{ marginTop:10, marginLeft:-18, marginRight:-18, marginBottom:-16 }}>
+          <ResponsiveContainer width="100%" height={38}>
+            <AreaChart data={spark.map((v, i) => ({ i, v }))} margin={{ top:2, right:0, bottom:0, left:0 }}>
+              <defs>
+                <linearGradient id={`sp${gid}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={sc} stopOpacity={0.3} />
+                  <stop offset="100%" stopColor={sc} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="v" stroke={sc} strokeWidth={1.75} fill={`url(#sp${gid})`} dot={false} isAnimationActive={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // - Badge ---------------------------------------------------------------------
 export const Badge = ({ children, color }) => {

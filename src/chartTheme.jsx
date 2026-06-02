@@ -28,3 +28,15 @@ export const LBL = { ...TYPE.dataLabel };
 
 // Espessura padrão de linhas/áreas.
 export const STROKE_W = 2;
+
+// Formatador compacto para eixos (R$ 50k, R$ 1,5M) — mais limpo que o BRL completo.
+export const fmtAxis = (v) => {
+  const a = Math.abs(v), s = v < 0 ? "-" : "";
+  if (a >= 1e6) return `${s}R$${(a / 1e6).toFixed(a >= 1e7 ? 0 : 1).replace(".", ",")}M`;
+  if (a >= 1e3) return `${s}R$${Math.round(a / 1e3)}k`;
+  return `${s}R$${Math.round(a)}`;
+};
+
+// Defaults de linha/área: curva suave, sem pontos fixos (ponto só no hover).
+export const LINE = { type: "monotone", strokeWidth: STROKE_W, dot: false, activeDot: { r: 4 } };
+export const AREA = { type: "monotone", strokeWidth: STROKE_W, dot: false, activeDot: { r: 4 } };
