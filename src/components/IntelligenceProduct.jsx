@@ -1,6 +1,4 @@
-import { useId } from "react";
 import { T, MONO, RADII } from "../theme";
-import { AreaChart, Area, ResponsiveContainer } from "recharts";
 
 export const DataBadge = ({ label = "Base demo", tone = "blue" }) => {
   const colors = { blue:T.blue2, green:T.grn, amber:T.amb, red:T.red, cyan:T.purp };
@@ -24,33 +22,14 @@ export const ProductHero = ({ eyebrow, title, children, right }) => (
   </section>
 );
 
-export const MetricTile = ({ label, value, sub, color = T.txt, accent = color, spark }) => {
-  const gid = useId().replace(/:/g, "");
-  const hasSpark = Array.isArray(spark) && spark.length > 1;
-  return (
+export const MetricTile = ({ label, value, sub, color = T.txt, accent = color }) => (
   <div style={{ background:T.card, border:`1px solid ${T.brd}`, borderRadius:RADII.md, boxShadow:T.shadow, padding:"12px 14px", position:"relative", overflow:"hidden", minHeight:78 }}>
     <div style={{ position:"absolute", inset:"0 auto 0 0", width:3, background:accent }} />
     <div style={{ fontSize:9, color:T.muted, fontWeight:700, textTransform:"uppercase", letterSpacing:".14em", marginBottom:5 }}>{label}</div>
     <div style={{ color, fontFamily:MONO, fontWeight:800, fontSize:18, lineHeight:1.05, fontVariantNumeric:"tabular-nums" }}>{value}</div>
     {sub && <div style={{ color:T.muted, fontSize:10, marginTop:5, lineHeight:1.3 }}>{sub}</div>}
-    {hasSpark && (
-      <div style={{ marginTop:8, marginLeft:-14, marginRight:-14, marginBottom:-12 }}>
-        <ResponsiveContainer width="100%" height={34}>
-          <AreaChart data={spark.map((v, i) => ({ i, v }))} margin={{ top:2, right:0, bottom:0, left:0 }}>
-            <defs>
-              <linearGradient id={`mt${gid}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={accent} stopOpacity={0.28} />
-                <stop offset="100%" stopColor={accent} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <Area type="monotone" dataKey="v" stroke={accent} strokeWidth={1.6} fill={`url(#mt${gid})`} dot={false} isAnimationActive={false} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    )}
   </div>
-  );
-};
+);
 
 export const InsightCard = ({ area, nivel, title, children, color = T.blue2, onClick }) => {
   const Component = onClick ? "button" : "div";

@@ -551,10 +551,10 @@ export default function DRE() {
 
       {/* KPIs */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(148px,1fr))", gap:10 }}>
-        <Kpi label="Receita Bruta"     value={money(rb)}      cor={T.grn}       accent={T.grn}      spark={dadosBarras.map(d=>d.Receita)} />
-        <Kpi label="Lucro Bruto"       value={money(lb)}      cor={T.grn}       accent={T.grn}      sub={rb>0 ? "Margem: "+((lb/rb)*100).toFixed(1)+"%" : undefined} spark={dadosBarras.map(d=>d["Lucro Bruto"])} />
-        <Kpi label="EBITDA"            value={money(eb)}      cor={T.corV(eb)}  accent={T.corV(eb)} sub={rb>0 ? "Margem: "+((eb/rb)*100).toFixed(1)+"%" : undefined} spark={mesesRealizados.map(m=>tabelaBase["(=) EBITDA"]?.[m]||0)} />
-        <Kpi label="Resultado Líquido" value={money(rs)}      cor={T.corV(rs)}  accent={T.corV(rs)} sub={rb>0 ? "Margem: "+((rs/rb)*100).toFixed(1)+"%" : undefined} spark={dadosBarras.map(d=>d.Resultado)} />
+        <Kpi label="Receita Bruta"     value={money(rb)}      cor={T.grn}       accent={T.grn} />
+        <Kpi label="Lucro Bruto"       value={money(lb)}      cor={T.grn}       accent={T.grn} sub={rb>0 ? "Margem: "+((lb/rb)*100).toFixed(1)+"%" : undefined} />
+        <Kpi label="EBITDA"            value={money(eb)}      cor={T.corV(eb)}  accent={T.corV(eb)} sub={rb>0 ? "Margem: "+((eb/rb)*100).toFixed(1)+"%" : undefined} />
+        <Kpi label="Resultado Líquido" value={money(rs)}      cor={T.corV(rs)}  accent={T.corV(rs)} sub={rb>0 ? "Margem: "+((rs/rb)*100).toFixed(1)+"%" : undefined} />
       </div>
 
       {modo === "Executivo" && <ExecutiveAlerts items={alertasExecutivos} />}
