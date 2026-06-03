@@ -83,10 +83,10 @@ export default function Home() {
       </ProductHero>
 
       <div className="intel-grid-4">
-        <MetricTile label="Saldo atual" value={fmt.brlk(kpis.saldoAtual)} sub={`Menor saldo projetado ${fmt.brlk(kpis.menorSaldo)}`} color={moneyColor(kpis.saldoAtual)} accent={T.blue2} />
-        <MetricTile label="Runway" value={`${kpis.runwayDias} dias`} sub={kpis.menorSaldo < 0 ? `Ruptura projetada: ${fmt.brlk(kpis.menorSaldo)}` : "Sem ruptura no cenário base"} color={kpis.runwayDias < 30 ? T.red : kpis.runwayDias < 60 ? T.amb : T.grn} accent={T.grn} />
-        <MetricTile label="EBITDA YTD" value={fmt.brlk(kpis.ebitda)} sub={`${pct(kpis.margemEbitdaPct)} da receita líquida`} color={moneyColor(kpis.ebitda)} accent={T.amb} />
-        <MetricTile label="Resultado líquido" value={fmt.brlk(kpis.resultado)} sub={`${pct(kpis.margemLiquidaPct)} de margem final`} color={moneyColor(kpis.resultado)} accent={T.purp} />
+        <MetricTile label="Saldo atual" value={fmt.brlk(kpis.saldoAtual)} sub={`Menor saldo projetado ${fmt.brlk(kpis.menorSaldo)}`} color={moneyColor(kpis.saldoAtual)} accent={T.blue2} spark={(fluxo||[]).map(f=>f.saldo)} />
+        <MetricTile label="Runway" value={`${kpis.runwayDias} dias`} sub={kpis.menorSaldo < 0 ? `Ruptura projetada: ${fmt.brlk(kpis.menorSaldo)}` : "Sem ruptura no cenário base"} color={kpis.runwayDias < 30 ? T.red : kpis.runwayDias < 60 ? T.amb : T.grn} accent={T.grn} spark={(fluxo||[]).map(f=>f.saldo)} />
+        <MetricTile label="EBITDA YTD" value={fmt.brlk(kpis.ebitda)} sub={`${pct(kpis.margemEbitdaPct)} da receita líquida`} color={moneyColor(kpis.ebitda)} accent={T.amb} spark={(meses||[]).map(m=>m.margemEbitdaPct)} />
+        <MetricTile label="Resultado líquido" value={fmt.brlk(kpis.resultado)} sub={`${pct(kpis.margemLiquidaPct)} de margem final`} color={moneyColor(kpis.resultado)} accent={T.purp} spark={(meses||[]).map(m=>m.margemLiquidaPct)} />
       </div>
 
       <section>
